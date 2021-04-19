@@ -10,9 +10,11 @@ num_epochs = 15
 
 
 def main():
-    model = autoencoder.Autoencoder()
+    device = "cuda"
 
-    batch_size = 50
+    model = autoencoder.Autoencoder(784, 20)
+    model.to(device)
+    batch_size = 10
     t = transforms.Compose([
                        transforms.ToTensor()]
                        )
@@ -22,31 +24,31 @@ def main():
     data_valid = DataLoader( torchvision.datasets.MNIST('/data/mnist', download=True, train=False, transform=t),
         batch_size=batch_size, drop_last=True, shuffle=True)
 
-    optimizer = torch.optim.Adam(model.parameters(), lr = 0.01)
+    optimizer = torch.optim.Adam(model.parameters(), lr = 0.0001)
     for curr_epoch in range(num_epochs):
         epoch_loss = 0
         store_loss_x = 0
         store_loss_dkl = 0
         for (data, _) in data_train:
             optimizer.zero_grad()
-            data_shaped = data.view(data.shape[0], -1)
+            data_shaped = data.view(data.shape[0], -1).to(device)
 
             x_hat, KL = model(data_shaped)
             loss = nn.functional.binary_cross_entropy(x_hat, data_shaped, reduction='sum')
 
             loss.backward()
             optimizer.step()
-            epoch_loss += loss.detach().numpy()
+            epoch_loss += loss.cpu().detach().numpy()
 
         print(curr_epoch, ": ", epoch_loss)
 
-    for (data, _) in data_train:
-        data_shaped = data.view(data.shape[0], -1)
+    for (data, _) in data_valid:
+        data_shaped = data.view(data.shape[0], -1).to(device)
         x, _ = model(data_shaped)
         optimizer.step()
-        cv2.imshow("win", data_shaped[0].view(28,28).numpy())
+        cv2.imshow("win", data_shaped[0].cpu().view(28,28).numpy())
         cv2.waitKey(0)
-        cv2.imshow("win", x[0].view(28,28).detach().numpy())
+        cv2.imshow("win", x[0].cpu().view(28,28).detach().numpy())
         cv2.waitKey(0)
 
 if __name__ == "__main__":

@@ -4,10 +4,10 @@ import torch
 from torch.autograd import Variable
 
 class Autoencoder(nn.Module):
-    def __init__(self,):
+    def __init__(self, input_dim, latent_dims):
         super(Autoencoder, self).__init__()
-        self.encoder = Encoder()
-        self.decoder = Decoder()
+        self.encoder = Encoder(input_dim, latent_dims)
+        self.decoder = Decoder(input_dim, latent_dims)
 
     def forward(self, x):
         z, mean, log_var = self.encoder(x)
@@ -18,7 +18,7 @@ class Encoder(nn.Module):
     """
     Encodes a picture in output_dim dimensions.
     """
-    def __init__(self, input_dim = 784, layer_1 = 500, layer_2 = 100, output_dim = 2):
+    def __init__(self, input_dim = 784, output_dim = 2, layer_1 = 500, layer_2 = 100):
         super(Encoder, self).__init__()
 
         self.fc1 = nn.Linear(input_dim, layer_1)
@@ -41,7 +41,7 @@ def sample(mean, log_variance):
 
 
 class Decoder(nn.Module):
-    def __init__(self, input_dim = 2, layer_1 = 100, layer_2 = 500, output_dim = 784):
+    def __init__(self, output_dim = 784, input_dim = 2, layer_1 = 100, layer_2 = 500):
         super(Decoder, self).__init__()
         self.fc1 = nn.Linear(input_dim, layer_1)
         self.fc2 = nn.Linear(layer_1, layer_2)
