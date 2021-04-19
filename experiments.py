@@ -8,29 +8,24 @@ import cv2
 import numpy as np
 import os
 
-num_epochs = 100
+num_epochs = 5
 
 save_model_after_epoch = True
 
 def main():
     device = "cuda"
 
-    model = autoencoder.Autoencoder(3072, 2)
+    model = autoencoder.Autoencoder(784, 2)
     model.to(device)
-    batch_size = 1000
+    batch_size = 50
     t = transforms.Compose([
                        transforms.ToTensor()]
                        )
 
-    #data_train = DataLoader( torchvision.datasets.MNIST('/data/MNIST', download=True, train=True, transform=t),
-    #    batch_size=batch_size, drop_last=True, shuffle=True)
-    #data_valid = DataLoader( torchvision.datasets.MNIST('/data/mnist', download=True, train=False, transform=t),
-    #    batch_size=batch_size, drop_last=True, shuffle=True)
-
     print("Loading data")
-    data_train = DataLoader( torchvision.datasets.CIFAR10('\data\CIFAR10', download=True, train=True, transform=t),
+    data_train = DataLoader( torchvision.datasets.MNIST('\data\MNIST', download=True, train=True, transform=t),
        batch_size=batch_size, drop_last=True, shuffle=True)
-    data_valid = DataLoader( torchvision.datasets.CIFAR10('\data\cifar10', download=True, train=False, transform=t),
+    data_valid = DataLoader( torchvision.datasets.MNIST('\data\mnist', download=True, train=False, transform=t),
        batch_size=batch_size, drop_last=True, shuffle=True)
 
     print("Start training")

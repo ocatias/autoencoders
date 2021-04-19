@@ -9,17 +9,20 @@ from natsort import natsorted
 import glob
 
 # GENERAL PARAMETERS OF INPUT
-picture_width = 32
-picture_height = 32
-channels = 3
+picture_width = 28
+picture_height = 28
+channels = 1
 latent_space_dims = 2
+model_path = "autoencoder/models/model_final_MNIST.nn"
+
+out_width = 84
+out_height = 84
 
 # CYCLE PARAMETERS
 nr_images = 1000
 radius = 2
 output_path_cycle = "pictures\cycle"
-width = 84
-height = 84
+
 
 # LATENT SPACE PARAMETERS
 nr_images_per_row = 20
@@ -60,18 +63,15 @@ def draw_latent_space(decoder, save_img = True):
             images.append(pic)
 
     if channels == 1:
-        new_im = Image.new('L', (image_size*nr_images_per_row, image_size*nr_images_per_row))
+        new_im = Image.new('L', (out_width*nr_images_per_row, out_height*nr_images_per_row))
     elif channels == 3:
-        new_im = Image.new('RGB', (image_size*nr_images_per_row, image_size*nr_images_per_row))
+        new_im = Image.new('RGB', (out_width*nr_images_per_row, out_height*nr_images_per_row))
 
-
-    x_offset = 0
-    y_offset = 0
     for (j, im) in enumerate(images):
         if channels == 1:
-            new_im.paste(Image.fromarray(im), ((j % nr_images_per_row)*image_size, int((j / nr_images_per_row))*image_size))
+            new_im.paste(Image.fromarray(im), ((j % nr_images_per_row)*out_width, int((j / nr_images_per_row))*out_height))
         elif channels == 3:
-            new_im.paste(Image.fromarray(im), ((j % nr_images_per_row)*image_size, int((j / nr_images_per_row))*image_size))
+            new_im.paste(Image.fromarray(im), ((j % nr_images_per_row)*out_width, int((j / nr_images_per_row))*out_height))
 
     if save_img:
         new_im.save("latent_space.png")
@@ -86,7 +86,7 @@ def pic_from_decoder(sample, decoder):
     elif  channels == 1:
         pic = pic[0].view(picture_width,picture_height).detach().numpy()*255
     pic = pic.astype(np.uint8)
-    pic = cv2.resize(pic, (width, height))
+    pic = cv2.resize(pic, (out_width, out_height))
     return pic
 
 def draw_cycle(decoder):
@@ -113,7 +113,7 @@ if __name__ == "__main__":
     #draw_latent_space_gif()
 
     model = autoencoder.Autoencoder(picture_width*picture_height*channels, latent_space_dims)
-    model.load_state_dict(torch.load("autoencoder/models/model_final.nn"))
+    model.load_state_dict(torch.load(model_path))
     decoder = model.decoder
-    #draw_cycle(decoder)
+    draw_cycle(decoder)
     draw_latent_space(decoder)
